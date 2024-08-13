@@ -54,9 +54,11 @@ public class CountryController {
     }
 
     public void addCountry() {
+        String code = JOptionPane.showInputDialog(null, "Country code: ");
         String name = JOptionPane.showInputDialog(null, "Country name: ");
 
         Country country = new Country();
+        country.setCode(code);
         country.setName(name);
 
         createCountryUseCase.execute(country);

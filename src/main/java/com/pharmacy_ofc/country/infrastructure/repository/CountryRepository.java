@@ -42,7 +42,7 @@ public class CountryRepository implements CountryService{
 
     @Override
     public Optional<Country> findCountryById(String code) {
-        String sql = "SELECT country_code, country_name FROM country WHERE id = ? ";
+        String sql = "SELECT country_code, country_name FROM country WHERE country_code = ? ";
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, code);
@@ -60,7 +60,7 @@ public class CountryRepository implements CountryService{
 
     @Override
     public void updateCountry(Country country) {
-        String sql = "UPDATE country SET country_code = ?, country_name = ? WHERE id = ?";
+        String sql = "UPDATE country SET country_code = ?, country_name = ? WHERE country_code = ?";
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, country.getCode());
@@ -73,7 +73,7 @@ public class CountryRepository implements CountryService{
 
     @Override
     public void deleteCountry(String code) {
-        String sql = "DELETE FROM country WHERE id = ?";
+        String sql = "DELETE FROM country WHERE country_code = ?";
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, code);
