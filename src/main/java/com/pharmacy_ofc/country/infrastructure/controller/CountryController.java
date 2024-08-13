@@ -50,19 +50,24 @@ public class CountryController {
                 default:
                 JOptionPane.showMessageDialog(null, "Error en la opcion ingresada","Error",JOptionPane.ERROR_MESSAGE);
             } 
-        } while (op!= 4);
+        } while (op!= 5);
     }
 
     public void addCountry() {
         String code = JOptionPane.showInputDialog(null, "Country code: ");
+        if(code == null) {
+            return;
+        }
         String name = JOptionPane.showInputDialog(null, "Country name: ");
-
-        Country country = new Country();
-        country.setCode(code);
-        country.setName(name);
-
-        createCountryUseCase.execute(country);
-        JOptionPane.showMessageDialog(null, "Country added successfully");
+        if(name == null) {
+            return;
+        }
+            Country country = new Country();
+            country.setCode(code);
+            country.setName(name);
+    
+            createCountryUseCase.execute(country);
+            JOptionPane.showMessageDialog(null, "Country added successfully");
     }
 
     public void findCountry() {
@@ -71,7 +76,11 @@ public class CountryController {
 
             findCountryByIdUseCase.execute(code).ifPresentOrElse(
                 countryFound -> {
-                    JOptionPane.showMessageDialog(null, countryFound.toString(),"Error",JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, 
+                    "Country found:\n" + 
+                    "Code: " + countryFound.getCode() + "\n" +
+                    "Name: " + countryFound.getName(),
+                    "Country Details", JOptionPane.INFORMATION_MESSAGE);
                 },
                 () -> {
                     JOptionPane.showMessageDialog(null, "Country not found.","Error",JOptionPane.ERROR_MESSAGE);

@@ -60,11 +60,11 @@ public class CountryRepository implements CountryService{
 
     @Override
     public void updateCountry(Country country) {
-        String sql = "UPDATE country SET country_code = ?, country_name = ? WHERE country_code = ?";
+        String sql = "UPDATE country SET country_name = ? WHERE country_code = ?";
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
-            ps.setString(1, country.getCode());
-            ps.setString(2, country.getName());
+            ps.setString(1, country.getName());
+            ps.setString(2, country.getCode());
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

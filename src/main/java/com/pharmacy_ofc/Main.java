@@ -17,7 +17,7 @@ public class Main {
                     countryController.mainMenu();
                     break;
                 case 2:
-                    JOptionPane.showMessageDialog(null, "Suerte nos vemos....");
+                    JOptionPane.showMessageDialog(null, "El que lo cierra es gai");
                     break;
                 default:
                     JOptionPane.showMessageDialog(null, "Error opcion invalida");
