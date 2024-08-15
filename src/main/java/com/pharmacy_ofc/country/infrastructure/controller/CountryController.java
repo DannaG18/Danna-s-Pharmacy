@@ -2,6 +2,7 @@ package com.pharmacy_ofc.country.infrastructure.controller;
 
 import java.util.Scanner;
 
+import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
 import com.pharmacy_ofc.country.application.CreateCountryUseCase;
@@ -29,9 +30,30 @@ public class CountryController {
 
     public void mainMenu() {
         String options = "1.Add country\n2. Search country\n3. Update country\n4. Delete country\n5. Return main menu.";
-        int op;
+        int op = 0;
+        ImageIcon customIcon = new ImageIcon("src/main/resources/img/logou.png");
                 do {
-            op = Integer.parseInt(JOptionPane.showInputDialog(null, options));
+                    Object selectedValue = JOptionPane.showInputDialog(
+                        null, 
+                        options, 
+                        "Country Menu", 
+                        JOptionPane.QUESTION_MESSAGE, 
+                        customIcon, 
+                        null, 
+                        null
+                    );
+
+                    if (selectedValue != null) {
+                        try {
+                            op = Integer.parseInt(selectedValue.toString());
+                        } catch (NumberFormatException e) {
+                            JOptionPane.showMessageDialog(null, "Invalid option. Please enter a valid number.", "Error", JOptionPane.ERROR_MESSAGE);
+                            continue; // Si la opción no es válida, vuelve a mostrar el menú
+                        }
+                    } else {
+                        op = -1; // Si el usuario cancela, se asigna un valor fuera de rango para salir del bucle
+                    }
+
             switch (op) {
                 case 1:
                     addCountry();
@@ -48,9 +70,9 @@ public class CountryController {
                 case 5:
                     break;
                 default:
-                JOptionPane.showMessageDialog(null, "Error en la opcion ingresada","Error",JOptionPane.ERROR_MESSAGE);
+                    break;
             } 
-        } while (op!= 5);
+        } while (op!= 5 && op != -1);
     }
 
     public void addCountry() {

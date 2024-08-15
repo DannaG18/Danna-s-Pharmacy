@@ -68,10 +68,10 @@ CREATE TABLE medicine(
     CONSTRAINT fk_medicine_code_lab FOREIGN KEY (code_lab) REFERENCES laboratory(id_lab)
 );
 
-CREATE TABLE farmacy(
+CREATE TABLE pharmacy(
     id_fm INT(4) AUTO_INCREMENT,
     name_fm VARCHAR(50),
-    adress_pm VARCHAR(100),
+    adress_fm VARCHAR(100),
     long_fm FLOAT(8),
     lat_fm FLOAT(8),
     logo_fm VARCHAR(50),
@@ -80,13 +80,13 @@ CREATE TABLE farmacy(
     CONSTRAINT fk_fm_code_city FOREIGN KEY (code_city_fm) REFERENCES city(code_city)
 );
 
-CREATE TABLE farmacy_medicine(
+CREATE TABLE pharmacy_medicine(
     id_medicine INT(4),
     id_fm INT(4),
     price FLOAT(8),
     CONSTRAINT pk_id_med_pharm PRIMARY KEY (id_medicine, id_fm),
     CONSTRAINT fk_id_fm_m FOREIGN KEY (id_medicine) REFERENCES medicine (id_medicine),
-    CONSTRAINT fk_id_fm_f FOREIGN KEY (id_fm) REFERENCES farmacy (id_fm)
+    CONSTRAINT fk_id_fm_f FOREIGN KEY (id_fm) REFERENCES pharmacy (id_fm)
 );
 
 CREATE TABLE customer(
