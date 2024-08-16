@@ -51,50 +51,60 @@ public class LaboratoryController {
         String name = getInput("Enter Laboratory name:");
         String cityCode = getInput("Enter City Code:");
 
-        if (name != null && cityCode != null) {
+        if (isValidInput(name) && isValidInput(cityCode)) {
             Laboratory laboratory = new Laboratory();
             laboratory.setName(name);
             laboratory.setCity_code(cityCode);
 
             createLaboratoryUseCase.execute(laboratory);
             JOptionPane.showMessageDialog(null, "Laboratory added successfully.");
+        } else {
+            JOptionPane.showMessageDialog(null, "Please provide valid inputs for all fields.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void findLaboratory() {
         int id = getInputAsInteger("Enter Laboratory ID:");
 
-        findLaboratoryUseCase.execute(id).ifPresentOrElse(
-                laboratory -> showLaboratoryDetails(laboratory),
-                () -> JOptionPane.showMessageDialog(null, "Laboratory not found.", "Error", JOptionPane.ERROR_MESSAGE)
-        );
+        if (id != -1) {
+            findLaboratoryUseCase.execute(id).ifPresentOrElse(
+                    this::showLaboratoryDetails,
+                    () -> JOptionPane.showMessageDialog(null, "Laboratory not found.", "Error", JOptionPane.ERROR_MESSAGE)
+            );
+        }
     }
 
     private void updateLaboratory() {
         int id = getInputAsInteger("Enter Laboratory ID:");
 
-        findLaboratoryUseCase.execute(id).ifPresentOrElse(
-                laboratory -> {
-                    String name = getInput("Enter new Laboratory name:");
-                    String cityCode = getInput("Enter new City Code:");
+        if (id != -1) {
+            findLaboratoryUseCase.execute(id).ifPresentOrElse(
+                    laboratory -> {
+                        String name = getInput("Enter new Laboratory name:");
+                        String cityCode = getInput("Enter new City Code:");
 
-                    if (name != null && cityCode != null) {
-                        laboratory.setName(name);
-                        laboratory.setCity_code(cityCode);
-                        updateLaboratoryUseCase.execute(laboratory);
-                        JOptionPane.showMessageDialog(null, "Laboratory updated successfully.");
-                    }
-                },
-                () -> JOptionPane.showMessageDialog(null, "Laboratory not found.", "Error", JOptionPane.ERROR_MESSAGE)
-        );
+                        if (isValidInput(name) && isValidInput(cityCode)) {
+                            laboratory.setName(name);
+                            laboratory.setCity_code(cityCode);
+                            updateLaboratoryUseCase.execute(laboratory);
+                            JOptionPane.showMessageDialog(null, "Laboratory updated successfully.");
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Please provide valid inputs for all fields.", "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    },
+                    () -> JOptionPane.showMessageDialog(null, "Laboratory not found.", "Error", JOptionPane.ERROR_MESSAGE)
+            );
+        }
     }
 
     private void deleteLaboratory() {
         int id = getInputAsInteger("Enter Laboratory ID:");
 
-        if (JOptionPane.showConfirmDialog(null, "Are you sure you want to delete this laboratory?", "Confirm Deletion", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-            deleteLaboratoryUseCase.execute(id);
-            JOptionPane.showMessageDialog(null, "Laboratory deleted successfully.");
+        if (id != -1) {
+            if (JOptionPane.showConfirmDialog(null, "Are you sure you want to delete this laboratory?", "Confirm Deletion", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                deleteLaboratoryUseCase.execute(id);
+                JOptionPane.showMessageDialog(null, "Laboratory deleted successfully.");
+            }
         }
     }
 
@@ -112,6 +122,10 @@ public class LaboratoryController {
         }
     }
 
+    private boolean isValidInput(String input) {
+        return input != null && !input.trim().isEmpty();
+    }
+
     private void showLaboratoryDetails(Laboratory laboratory) {
         String details = String.format("""
                 Laboratory found:
@@ -122,6 +136,7 @@ public class LaboratoryController {
         JOptionPane.showMessageDialog(null, details, "Laboratory Details", JOptionPane.INFORMATION_MESSAGE);
     }
 }
+
 
 
 

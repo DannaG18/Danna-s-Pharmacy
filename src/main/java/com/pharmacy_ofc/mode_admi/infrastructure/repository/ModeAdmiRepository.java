@@ -60,7 +60,7 @@ public class ModeAdmiRepository implements ModeAdmiService{
 
     @Override
     public void updateModeAdmi(ModeAdmi modeAdmi) {
-        String sql = "UPDATE mode_admi SET description_mod_admi = ? WHERE id_mod_ad = ?";
+        String sql = "UPDATE mode_admi SET description_mod_admi = ? WHERE id_mod_admi = ?";
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, modeAdmi.getDescription());

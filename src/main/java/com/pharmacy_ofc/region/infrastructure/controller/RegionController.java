@@ -2,6 +2,7 @@ package com.pharmacy_ofc.region.infrastructure.controller;
 
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
+import java.util.Optional;
 
 import com.pharmacy_ofc.region.domain.entity.Region;
 import com.pharmacy_ofc.region.application.CreateRegionUseCase;
@@ -12,14 +13,14 @@ import com.pharmacy_ofc.region.domain.service.RegionService;
 import com.pharmacy_ofc.region.infrastructure.repository.RegionRepository;
 
 public class RegionController {
-    private RegionService regionService;
-    private CreateRegionUseCase createRegionUseCase;
-    private FindRegionUseCase findRegionUseCase;
-    private UpdateRegionUseCase updateRegionUseCase;
-    private DeleteRegionUseCase deleteRegionUseCase;
+
+    private final CreateRegionUseCase createRegionUseCase;
+    private final FindRegionUseCase findRegionUseCase;
+    private final UpdateRegionUseCase updateRegionUseCase;
+    private final DeleteRegionUseCase deleteRegionUseCase;
 
     public RegionController() {
-        this.regionService = new RegionRepository();
+        RegionService regionService = new RegionRepository();
         this.createRegionUseCase = new CreateRegionUseCase(regionService);
         this.findRegionUseCase = new FindRegionUseCase(regionService);
         this.updateRegionUseCase = new UpdateRegionUseCase(regionService);
@@ -27,120 +28,109 @@ public class RegionController {
     }
 
     public void mainMenu() {
-        String options = "1. Add Region\n2. Search Region\n3. Update Region\n4. Delete Region\n5. Return to main menu.";
-        int op = 0;
+        String options = """
+                1. Add Region
+                2. Search Region
+                3. Update Region
+                4. Delete Region
+                5. Return to main menu
+                """;
         ImageIcon customIcon = new ImageIcon("src/main/resources/img/logou.png");
-        
+        int option;
+
         do {
-            Object selectedValue = JOptionPane.showInputDialog(
-                null, 
-                options, 
-                "Region Menu", 
-                JOptionPane.QUESTION_MESSAGE, 
-                customIcon, 
-                null, 
-                null
-            );
-
-            if (selectedValue != null) {
-                try {
-                    op = Integer.parseInt(selectedValue.toString());
-                } catch (NumberFormatException e) {
-                    JOptionPane.showMessageDialog(null, "Invalid option. Please enter a valid number.", "Error", JOptionPane.ERROR_MESSAGE);
-                    continue; // Si la opción no es válida, vuelve a mostrar el menú
-                }
-            } else {
-                op = -1; // Si el usuario cancela, se asigna un valor fuera de rango para salir del bucle
+            option = getMenuOption(options, customIcon);
+            switch (option) {
+                case 1 -> addRegion();
+                case 2 -> findRegion();
+                case 3 -> updateRegion();
+                case 4 -> deleteRegion();
+                case 5 -> JOptionPane.showMessageDialog(null, "Exiting the menu.");
+                default -> JOptionPane.showMessageDialog(null, "Invalid option. Please select a valid number.", "Error", JOptionPane.ERROR_MESSAGE);
             }
-
-            switch (op) {
-                case 1:
-                    addRegion();
-                    break;
-                case 2:
-                    findRegion();
-                    break;
-                case 3:
-                    updateRegion();
-                    break;
-                case 4:
-                    deleteRegion();
-                    break;
-                case 5:
-                    break;
-                default:
-                    break;
-            } 
-        } while (op != 5 && op != -1);
+        } while (option != 5 && option != -1);
     }
 
-    public void addRegion() {
-        String code = JOptionPane.showInputDialog(null, "Region code: ");
-        if (code == null) {
-            return;
+    private int getMenuOption(String options, ImageIcon icon) {
+        try {
+            Object selectedValue = JOptionPane.showInputDialog(
+                null, options, "Region Menu", JOptionPane.QUESTION_MESSAGE, icon, null, null
+            );
+            return (selectedValue != null) ? Integer.parseInt(selectedValue.toString()) : -1;
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Invalid option. Please enter a valid number.", "Error", JOptionPane.ERROR_MESSAGE);
+            return 0;
         }
-        String name = JOptionPane.showInputDialog(null, "Region name: ");
-        if (name == null) {
-            return;
-        }
-        String country_code = JOptionPane.showInputDialog(null, "Region country: ");
-        if (country_code == null) {
-            return;
-        }
-
-        Region region = new Region();
-        region.setCode(code);
-        region.setName(name);
-        region.setCountry_code(country_code);
-
-        createRegionUseCase.execute(region);
-        JOptionPane.showMessageDialog(null, "Region added successfully.");
     }
 
-    public void findRegion() {
-        String code = JOptionPane.showInputDialog(null, "Enter Region code: ");
+    private void addRegion() {
+        String code = getValidatedInput("Region code: ");
+        String name = getValidatedInput("Region name: ");
+        String countryCode = getValidatedInput("Region country code: ");
 
-        findRegionUseCase.execute(code).ifPresentOrElse(
-            regionFound -> {
-                JOptionPane.showMessageDialog(null, 
-                    "Region found:\n" + 
-                    "Code: " + regionFound.getCode() + "\n" +
-                    "Name: " + regionFound.getName() + "\n" +
-                    "Country Code: " + regionFound.getCountry_code(),
-                    "Region Details", JOptionPane.INFORMATION_MESSAGE);
-            },
-            () -> {
-                JOptionPane.showMessageDialog(null, "Region not found.", "Error", JOptionPane.ERROR_MESSAGE);
-            });
-    }
+        if (code != null && name != null && countryCode != null) {
+            Region region = new Region();
+            region.setCode(code);
+            region.setName(name);
+            region.setCountry_code(countryCode);
 
-    public void updateRegion() {
-        String code = JOptionPane.showInputDialog(null, "Enter Region code: ");
-
-        findRegionUseCase.execute(code).ifPresentOrElse(
-            currentRegion -> {
-                String name = JOptionPane.showInputDialog(null, "Enter new Region name: ");
-                if (name == null) {
-                    return;
-                }
-
-                currentRegion.setName(name);
-                updateRegionUseCase.execute(currentRegion);
-
-                JOptionPane.showMessageDialog(null, "Region updated successfully.");
-            }, 
-            () -> {
-                JOptionPane.showMessageDialog(null, "Region not found.", "Error", JOptionPane.ERROR_MESSAGE);
-            });
-    }
-
-    public void deleteRegion() {
-        String code = JOptionPane.showInputDialog(null, "Enter Region code: ");
-        if (code == null) {
-            return;
+            createRegionUseCase.execute(region);
+            JOptionPane.showMessageDialog(null, "Region added successfully.");
         }
-        deleteRegionUseCase.execute(code);
-        JOptionPane.showMessageDialog(null, "Region deleted successfully.");
+    }
+
+    private void findRegion() {
+        String code = getValidatedInput("Enter Region code: ");
+
+        if (code != null) {
+            Optional<Region> regionFound = findRegionUseCase.execute(code);
+            regionFound.ifPresentOrElse(
+                this::showRegionDetails,
+                () -> JOptionPane.showMessageDialog(null, "Region not found.", "Error", JOptionPane.ERROR_MESSAGE)
+            );
+        }
+    }
+
+    private void updateRegion() {
+        String code = getValidatedInput("Enter Region code: ");
+
+        if (code != null) {
+            findRegionUseCase.execute(code).ifPresentOrElse(
+                currentRegion -> {
+                    String name = getValidatedInput("Enter new Region name: ");
+                    if (name != null) {
+                        currentRegion.setName(name);
+                        updateRegionUseCase.execute(currentRegion);
+                        JOptionPane.showMessageDialog(null, "Region updated successfully.");
+                    }
+                },
+                () -> JOptionPane.showMessageDialog(null, "Region not found.", "Error", JOptionPane.ERROR_MESSAGE)
+            );
+        }
+    }
+
+    private void deleteRegion() {
+        String code = getValidatedInput("Enter Region code: ");
+
+        if (code != null) {
+            deleteRegionUseCase.execute(code);
+            JOptionPane.showMessageDialog(null, "Region deleted successfully.");
+        }
+    }
+
+    private String getValidatedInput(String message) {
+        String input = JOptionPane.showInputDialog(null, message);
+        return (input != null && !input.trim().isEmpty()) ? input.trim() : null;
+    }
+
+    private void showRegionDetails(Region region) {
+        String details = String.format("""
+                Region found:
+                Code: %s
+                Name: %s
+                Country Code: %s
+                """, region.getCode(), region.getName(), region.getCountry_code());
+        JOptionPane.showMessageDialog(null, details, "Region Details", JOptionPane.INFORMATION_MESSAGE);
     }
 }
 

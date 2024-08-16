@@ -11,11 +11,12 @@ import com.pharmacy_ofc.pharmacy.domain.service.PharmacyService;
 import com.pharmacy_ofc.pharmacy.infrastructure.repository.PharmacyRepository;
 
 public class PharmacyController {
+
     private final PharmacyService pharmacyService;
-    private final CreatePharmacyUseCase createPharmacyUseCase; // Cambiado a PascalCase
-    private final FindPharmacyUseCase findPharmacyUseCase;     // Cambiado a PascalCase
-    private final UpdatePharmacyUseCase updatePharmacyUseCase; // Cambiado a PascalCase
-    private final DeletePharmacyUseCase deletePharmacyUseCase; // Cambiado a PascalCase
+    private final CreatePharmacyUseCase createPharmacyUseCase;
+    private final FindPharmacyUseCase findPharmacyUseCase;
+    private final UpdatePharmacyUseCase updatePharmacyUseCase;
+    private final DeletePharmacyUseCase deletePharmacyUseCase;
 
     public PharmacyController() {
         this.pharmacyService = new PharmacyRepository();
@@ -44,18 +45,18 @@ public class PharmacyController {
                 case 5 -> JOptionPane.showMessageDialog(null, "Exiting the menu.");
                 default -> JOptionPane.showMessageDialog(null, "Invalid option selected.", "Error", JOptionPane.ERROR_MESSAGE);
             }
-        } while (op != 5);
+        } while (op != 5 && op != -1); // Salir si se selecciona la opción 5 o una opción no válida
     }
 
     private void addPharmacy() {
         String name = getInput("Enter pharmacy name:");
         String address = getInput("Enter pharmacy address:");
-        float longitude = getInputAsFloat("Enter pharmacy longitude:");
-        float latitude = getInputAsFloat("Enter pharmacy latitude:");
+        Float longitude = getInputAsFloat("Enter pharmacy longitude:");
+        Float latitude = getInputAsFloat("Enter pharmacy latitude:");
         String logo = getInput("Enter pharmacy logo URL:");
         String cityCode = getInput("Enter City Code:");
 
-        if (name != null && cityCode != null) {
+        if (validatePharmacyFields(name, address, longitude, latitude, cityCode)) {
             Pharmacy pharmacy = new Pharmacy();
             pharmacy.setName(name);
             pharmacy.setAddress(address);
@@ -71,26 +72,28 @@ public class PharmacyController {
 
     private void findPharmacy() {
         int id = getInputAsInteger("Enter pharmacy ID:");
+        if (id < 0) return; // Verifica si el ID es válido
 
         findPharmacyUseCase.execute(id).ifPresentOrElse(
-                pharmacy -> showPharmacyDetails(pharmacy),
+                this::showPharmacyDetails,
                 () -> JOptionPane.showMessageDialog(null, "Pharmacy not found.", "Error", JOptionPane.ERROR_MESSAGE)
         );
     }
 
     private void updatePharmacy() {
         int id = getInputAsInteger("Enter pharmacy ID:");
+        if (id < 0) return; // Verifica si el ID es válido
 
         findPharmacyUseCase.execute(id).ifPresentOrElse(
                 pharmacy -> {
                     String name = getInput("Enter new pharmacy name:");
                     String address = getInput("Enter new pharmacy address:");
-                    float longitude = getInputAsFloat("Enter new pharmacy longitude:");
-                    float latitude = getInputAsFloat("Enter new pharmacy latitude:");
+                    Float longitude = getInputAsFloat("Enter new pharmacy longitude:");
+                    Float latitude = getInputAsFloat("Enter new pharmacy latitude:");
                     String logo = getInput("Enter new pharmacy logo URL:");
                     String cityCode = getInput("Enter new City Code:");
 
-                    if (name != null && cityCode != null) {
+                    if (validatePharmacyFields(name, address, longitude, latitude, cityCode)) {
                         pharmacy.setName(name);
                         pharmacy.setAddress(address);
                         pharmacy.setLongitude(longitude);
@@ -107,8 +110,10 @@ public class PharmacyController {
 
     private void deletePharmacy() {
         int id = getInputAsInteger("Enter pharmacy ID:");
+        if (id < 0) return; // Verifica si el ID es válido
 
-        if (JOptionPane.showConfirmDialog(null, "Are you sure you want to delete this pharmacy?", "Confirm Deletion", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+        int confirmation = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete this pharmacy?", "Confirm Deletion", JOptionPane.YES_NO_OPTION);
+        if (confirmation == JOptionPane.YES_OPTION) {
             deletePharmacyUseCase.execute(id);
             JOptionPane.showMessageDialog(null, "Pharmacy deleted successfully.");
         }
@@ -116,25 +121,35 @@ public class PharmacyController {
 
     private String getInput(String message) {
         String input = JOptionPane.showInputDialog(null, message);
-        return (input != null && !input.trim().isEmpty()) ? input : null;
+        return (input != null && !input.trim().isEmpty()) ? input.trim() : null;
     }
 
     private int getInputAsInteger(String message) {
         try {
-            return Integer.parseInt(getInput(message));
+            String input = getInput(message);
+            return (input != null) ? Integer.parseInt(input) : -1;
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(null, "Invalid input. Please enter a valid integer.", "Error", JOptionPane.ERROR_MESSAGE);
-            return -1; // Returning a default invalid value
+            return -1; // Valor predeterminado para una entrada inválida
         }
     }
 
-    private float getInputAsFloat(String message) {
+    private Float getInputAsFloat(String message) {
         try {
-            return Float.parseFloat(getInput(message));
+            String input = getInput(message);
+            return (input != null) ? Float.parseFloat(input) : null;
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(null, "Invalid input. Please enter a valid number.", "Error", JOptionPane.ERROR_MESSAGE);
-            return -1f; // Returning a default invalid value
+            return null; // Retorna null para una entrada inválida
         }
+    }
+
+    private boolean validatePharmacyFields(String name, String address, Float longitude, Float latitude, String cityCode) {
+        if (name == null || address == null || longitude == null || latitude == null || cityCode == null) {
+            JOptionPane.showMessageDialog(null, "All fields are required.", "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        return true;
     }
 
     private void showPharmacyDetails(Pharmacy pharmacy) {
@@ -151,4 +166,5 @@ public class PharmacyController {
         JOptionPane.showMessageDialog(null, details, "Pharmacy Details", JOptionPane.INFORMATION_MESSAGE);
     }
 }
+
 

@@ -43,7 +43,7 @@ public class RegionRepository implements RegionService {
 
     @Override
     public Optional<Region> findRegionById(String code) {
-        String sql = "SELECT code_reg, name_reg FROM region WHERE code_reg = ? ";
+        String sql = "SELECT code_reg, name_reg, country_code FROM region WHERE code_reg = ? ";
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, code);

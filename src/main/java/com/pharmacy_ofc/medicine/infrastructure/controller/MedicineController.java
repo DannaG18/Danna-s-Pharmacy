@@ -26,32 +26,28 @@ public class MedicineController {
     }
 
     public void mainMenu() {
-        String options = "1. Add Medicine \n2. Search Medicine\n3. Update Medicine\n4. Delete Medicine\n5. Return to main menu.";
+        String options = """
+                1. Add Medicine
+                2. Search Medicine
+                3. Update Medicine
+                4. Delete Medicine
+                5. Return to main menu
+                """;
         int op;
         do {
-            op = Integer.parseInt(JOptionPane.showInputDialog(null, options));
+            op = getInputAsInteger("Select an option:\n" + options);
             switch (op) {
-                case 1:
-                    addMedicine();
-                    break;
-                case 2:
-                    findMedicine();
-                    break;
-                case 3:
-                    updateMedicine();
-                    break;
-                case 4:
-                    deleteMedicine();
-                    break;
-                case 5:
-                    break;
-                default:
-                    JOptionPane.showMessageDialog(null, "Error: Invalid option", "Error", JOptionPane.ERROR_MESSAGE);
+                case 1 -> addMedicine();
+                case 2 -> findMedicine();
+                case 3 -> updateMedicine();
+                case 4 -> deleteMedicine();
+                case 5 -> JOptionPane.showMessageDialog(null, "Exiting the menu.");
+                default -> JOptionPane.showMessageDialog(null, "Invalid option selected.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         } while (op != 5);
     }
 
-    public void addMedicine() {
+    private void addMedicine() {
         Medicine medicine = new Medicine();
 
         medicine.setProceedings(promptInput("Medicine proceedings: "));
@@ -61,18 +57,18 @@ public class MedicineController {
         medicine.setDescription_short(promptInput("Short description: "));
         medicine.setName_rol(promptInput("Role name: "));
 
-        medicine.setCode_mode_adm(parseIntegerInput("Code for mode of administration: "));
-        medicine.setCode_act_p(parseIntegerInput("Code for active principle: "));
-        medicine.setCode_uni_m(parseIntegerInput("Code for unit measurement: "));
-        medicine.setCode_lab(parseIntegerInput("Code for laboratory: "));
+        medicine.setCode_mode_adm(getInputAsInteger("Code for mode of administration: "));
+        medicine.setCode_act_p(getInputAsInteger("Code for active principle: "));
+        medicine.setCode_uni_m(getInputAsInteger("Code for unit measurement: "));
+        medicine.setCode_lab(getInputAsInteger("Code for laboratory: "));
 
         createMedicineUseCase.execute(medicine);
         JOptionPane.showMessageDialog(null, "Medicine added successfully.");
     }
 
-    public void findMedicine() {
+    private void findMedicine() {
         try {
-            int id = parseIntegerInput("Enter Medicine ID: ");
+            int id = getInputAsInteger("Enter Medicine ID: ");
             findMedicineUseCase.execute(id).ifPresentOrElse(
                 medicineFound -> JOptionPane.showMessageDialog(null, formatMedicineDetails(medicineFound), "Medicine Details", JOptionPane.INFORMATION_MESSAGE),
                 () -> JOptionPane.showMessageDialog(null, "Medicine not found.", "Error", JOptionPane.ERROR_MESSAGE)
@@ -82,9 +78,9 @@ public class MedicineController {
         }
     }
 
-    public void updateMedicine() {
+    private void updateMedicine() {
         try {
-            int id = parseIntegerInput("Enter Medicine ID: ");
+            int id = getInputAsInteger("Enter Medicine ID: ");
             findMedicineUseCase.execute(id).ifPresentOrElse(
                 currentMedicine -> {
                     currentMedicine.setProceedings(promptInput("Medicine proceedings: "));
@@ -94,10 +90,10 @@ public class MedicineController {
                     currentMedicine.setDescription_short(promptInput("Short description: "));
                     currentMedicine.setName_rol(promptInput("Role name: "));
 
-                    currentMedicine.setCode_mode_adm(parseIntegerInput("Code for mode of administration: "));
-                    currentMedicine.setCode_act_p(parseIntegerInput("Code for active principle: "));
-                    currentMedicine.setCode_uni_m(parseIntegerInput("Code for unit measurement: "));
-                    currentMedicine.setCode_lab(parseIntegerInput("Code for laboratory: "));
+                    currentMedicine.setCode_mode_adm(getInputAsInteger("Code for mode of administration: "));
+                    currentMedicine.setCode_act_p(getInputAsInteger("Code for active principle: "));
+                    currentMedicine.setCode_uni_m(getInputAsInteger("Code for unit measurement: "));
+                    currentMedicine.setCode_lab(getInputAsInteger("Code for laboratory: "));
 
                     updateMedicineUseCase.execute(currentMedicine);
                     JOptionPane.showMessageDialog(null, "Medicine updated successfully.");
@@ -109,9 +105,9 @@ public class MedicineController {
         }
     }
 
-    public void deleteMedicine() {
+    private void deleteMedicine() {
         try {
-            int id = parseIntegerInput("Enter Medicine ID: ");
+            int id = getInputAsInteger("Enter Medicine ID: ");
             deleteMedicineUseCase.execute(id);
             JOptionPane.showMessageDialog(null, "Medicine deleted successfully.");
         } catch (NumberFormatException e) {
@@ -128,7 +124,7 @@ public class MedicineController {
         return input.trim();
     }
 
-    private int parseIntegerInput(String message) {
+    private int getInputAsInteger(String message) {
         String input = promptInput(message);
         try {
             return Integer.parseInt(input);
@@ -153,4 +149,6 @@ public class MedicineController {
                "Code Laboratory: " + medicine.getCode_lab();
     }
 }
+
+
 

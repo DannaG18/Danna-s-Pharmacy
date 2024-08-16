@@ -1,9 +1,6 @@
 package com.pharmacy_ofc.active_principle.infrastructure.controller;
 
-import java.util.Scanner;
-
 import javax.swing.JOptionPane;
-
 import com.pharmacy_ofc.active_principle.application.CreateAPUseCase;
 import com.pharmacy_ofc.active_principle.application.DeleteAPUseCase;
 import com.pharmacy_ofc.active_principle.application.FindAPByIdUseCase;
@@ -13,11 +10,12 @@ import com.pharmacy_ofc.active_principle.domain.service.APService;
 import com.pharmacy_ofc.active_principle.infrastructure.repository.APRepository;
 
 public class APController {
-    private APService apService;
-    private CreateAPUseCase createAPUseCase;
-    private FindAPByIdUseCase findAPByIdUseCase;
-    private UpdateAPUseCase updateAPUseCase;
-    private DeleteAPUseCase deleteAPUseCase;
+
+    private final APService apService;
+    private final CreateAPUseCase createAPUseCase;
+    private final FindAPByIdUseCase findAPByIdUseCase;
+    private final UpdateAPUseCase updateAPUseCase;
+    private final DeleteAPUseCase deleteAPUseCase;
 
     public APController() {
         this.apService = new APRepository();
@@ -27,92 +25,114 @@ public class APController {
         this.deleteAPUseCase = new DeleteAPUseCase(apService);
     }
 
-        public void mainMenu() {
-        String options = "1.Add AP \n2. Search AP\n3. Update AP\n4. Delete AP\n5. Return main menu.";
+    public void mainMenu() {
+        String options = """
+                1. Add AP
+                2. Search AP
+                3. Update AP
+                4. Delete AP
+                5. Return to main menu
+                """;
+
         int op;
-                do {
-            op = Integer.parseInt(JOptionPane.showInputDialog(null, options));
+        do {
+            op = getInputAsInteger("Select an option:\n" + options);
             switch (op) {
-                case 1:
-                    addAP();
-                    break;
-                case 2:
-                    findAP();
-                    break;
-                case 3:
-                    updateAP();
-                    break;
-                case 4:
-                    deleteAP();
-                    break;
-                case 5:
-                    break;
-                default:
-                JOptionPane.showMessageDialog(null, "Error en la opcion ingresada","Error",JOptionPane.ERROR_MESSAGE);
-            } 
-        } while (op!= 5);
+                case 1 -> addAP();
+                case 2 -> findAP();
+                case 3 -> updateAP();
+                case 4 -> deleteAP();
+                case 5 -> JOptionPane.showMessageDialog(null, "Exiting the menu.");
+                default -> JOptionPane.showMessageDialog(null, "Invalid option selected.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } while (op != 5);
     }
 
-    public void addAP() {
-    
-        String name = JOptionPane.showInputDialog(null, "AP name: ");
-        if (name == null || name.trim().isEmpty()) {
+    private void addAP() {
+        String name = getInput("Enter AP name:");
+
+        if (name == null) {
+            JOptionPane.showMessageDialog(null, "AP name cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-    
-        ActivePrinciple actP = new ActivePrinciple();
-        actP.setName(name);
-    
-        createAPUseCase.execute(actP);
-        JOptionPane.showMessageDialog(null, "AP added successfully");
-    }
-    
 
-    public void findAP() {
-        try (Scanner scanner = new Scanner(System.in)) {
-            int id = Integer.parseInt(JOptionPane.showInputDialog(null, "Enter AP id: "));
+        ActivePrinciple activePrinciple = new ActivePrinciple();
+        activePrinciple.setName(name);
 
-            findAPByIdUseCase.execute(id).ifPresentOrElse(
-                APFound -> {
-                    JOptionPane.showMessageDialog(null, 
-                    "AP found:\n" + 
-                    "id: " + APFound.getId() + "\n" +
-                    "Name: " + APFound.getName(),
-                    "AP Details", JOptionPane.INFORMATION_MESSAGE);
-                },
-                () -> {
-                    JOptionPane.showMessageDialog(null, "AP not found.","Error",JOptionPane.ERROR_MESSAGE);
-                });
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        createAPUseCase.execute(activePrinciple);
+        JOptionPane.showMessageDialog(null, "AP added successfully.");
     }
 
-    public void updateAP() {
-        try (Scanner scanner = new Scanner(System.in)) {
-            int id = Integer.parseInt(JOptionPane.showInputDialog(null, "Enter AP id: "));
+    private void findAP() {
+        int id = getInputAsInteger("Enter AP id:");
 
-            findAPByIdUseCase.execute(id).ifPresentOrElse(
-                currentAP -> {
-                    String name = JOptionPane.showInputDialog(null, "Enter new AP name: ");
+        if (id < 0) return;
 
-                    currentAP.setName(name);
-                    updateAPUseCase.execute(currentAP);
+        findAPByIdUseCase.execute(id).ifPresentOrElse(
+                ap -> showAPDetails(ap),
+                () -> JOptionPane.showMessageDialog(null, "AP not found.", "Error", JOptionPane.ERROR_MESSAGE)
+        );
+    }
 
+    private void updateAP() {
+        int id = getInputAsInteger("Enter AP id:");
+
+        if (id < 0) return;
+
+        findAPByIdUseCase.execute(id).ifPresentOrElse(
+                ap -> {
+                    String name = getInput("Enter new AP name:");
+
+                    if (name == null) {
+                        JOptionPane.showMessageDialog(null, "AP name cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+
+                    ap.setName(name);
+                    updateAPUseCase.execute(ap);
                     JOptionPane.showMessageDialog(null, "AP updated successfully.");
-                }, 
-                () -> {
-                    JOptionPane.showMessageDialog(null, "AP not found.","Error",JOptionPane.ERROR_MESSAGE);
-                });
-        }
+                },
+                () -> JOptionPane.showMessageDialog(null, "AP not found.", "Error", JOptionPane.ERROR_MESSAGE)
+        );
     }
 
-    public void deleteAP() {
-        try (Scanner scanner = new Scanner(System.in)) {
-            int id = Integer.parseInt(JOptionPane.showInputDialog(null, "Enter AP id: "));
+    private void deleteAP() {
+        int id = getInputAsInteger("Enter AP id:");
+
+        if (id < 0) return;
+
+        int confirmation = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete this AP?", "Confirm Deletion", JOptionPane.YES_NO_OPTION);
+        if (confirmation == JOptionPane.YES_OPTION) {
             deleteAPUseCase.execute(id);
             JOptionPane.showMessageDialog(null, "AP deleted successfully.");
         }
+    }
+
+    private String getInput(String message) {
+        String input = JOptionPane.showInputDialog(null, message);
+        return (input != null && !input.trim().isEmpty()) ? input.trim() : null;
+    }
+
+    private int getInputAsInteger(String message) {
+        String input = getInput(message);
+        if (input == null) {
+            return -1; // Indica que se canceló la entrada
+        }
+
+        try {
+            return Integer.parseInt(input);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Invalid input. Please enter a valid integer.", "Error", JOptionPane.ERROR_MESSAGE);
+            return -1; // Valor inválido
+        }
+    }
+
+    private void showAPDetails(ActivePrinciple ap) {
+        String details = String.format("""
+                AP found:
+                ID: %d
+                Name: %s
+                """, ap.getId(), ap.getName());
+        JOptionPane.showMessageDialog(null, details, "AP Details", JOptionPane.INFORMATION_MESSAGE);
     }
 }

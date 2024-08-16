@@ -57,7 +57,7 @@ public class MedicineRepository implements MedicineService{
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if(rs.next()) {
-                    Medicine medicine = new Medicine(rs.getInt("id_medicine"), rs.getString("proceedings"), rs.getString(" name_medicine"), rs.getString("health_register"), rs.getString("description"), rs.getString("description_short"), rs.getString("name_rol"), rs.getInt("code_mode_adm"), rs.getInt("code_act_p"), rs.getInt("code_uni_m"), rs.getInt("code_lab"));
+                    Medicine medicine = new Medicine(rs.getInt("id_medicine"), rs.getString("proceedings"), rs.getString("name_medicine"), rs.getString("health_register"), rs.getString("description"), rs.getString("description_short"), rs.getString("name_rol"), rs.getInt("code_mode_adm"), rs.getInt("code_act_p"), rs.getInt("code_uni_m"), rs.getInt("code_lab"));
                     return Optional.of(medicine);
                 }
             }
